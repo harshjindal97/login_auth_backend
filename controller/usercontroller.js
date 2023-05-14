@@ -39,6 +39,40 @@ class UserController {
             }
         }
     }
+
+    static userLogin = async (req, res) => {
+
+        const { email, password } = req.body;
+
+        try {
+            if (email && password) {
+                const avail = await userModel.findOne({ email: email });
+
+                if (avail != null) {
+                    const isMatch = await bcrypt.compare(password, avail.password);
+
+                    if (email === avail.email && isMatch) {
+
+                        res.send({ "login": "sucessful" })
+                    } else {
+                        res.send({ "status": "failed", "message": "wrong email or password" })
+                    }
+
+                } else {
+                    res.send({ "status": "failed", "message": "User doesnot exist" })
+                }
+
+            } else {
+                res.send({ "status": "failed", "message": "All felids are compulsary" })
+            }
+        } catch (error) {
+            console.log(error);
+            res.send({ "status": "failed", "message": "unable to login" })
+        }
+
+    }
+
+
 }
 
 export default UserController;
