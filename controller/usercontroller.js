@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import userModel from "../models/user.js";
+import jwt from "jsonwebtoken";
 
 class UserController {
     static userRegistration = async (req, res) => {
@@ -26,7 +27,16 @@ class UserController {
                         })
                         await doc.save()
                         console.log(doc)
-                        res.send({ "status": "sucess" })
+
+                        const user_Id = await userModel.findOne({ email: email })
+
+                        //in this place i'm creating token
+
+                        const token = jwt.sign({ user_Id: user_Id._id }, process.env.JsonTokenKey, { expiresIn: '5d' })
+
+
+
+                        res.send({ "status": "sucess", "token": token })
                     } catch (error) {
                         console.log(error)
 
@@ -52,8 +62,14 @@ class UserController {
                     const isMatch = await bcrypt.compare(password, avail.password);
 
                     if (email === avail.email && isMatch) {
+                        // const user_Id = await userModel.findOne({ email: email })
 
-                        res.send({ "login": "sucessful" })
+                        //in this place i'm creating token
+
+                        const Tokenn = jwt.sign({ user_Id: avail._id }, process.env.JsonTokenKey, { expiresIn: '5d' })
+
+
+                        res.send({ "login": "sucessful", "token": Tokenn })
                     } else {
                         res.send({ "status": "failed", "message": "wrong email or password" })
                     }
