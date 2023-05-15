@@ -16,7 +16,7 @@ connectDb(DataBaseURL);
 
 app.use(express.json());
 
-app.use("/api/user", routerss)
+app.use("/api/users", routerss)
 
 app.listen(port, () => {
     console.log("server working")

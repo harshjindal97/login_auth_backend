@@ -117,12 +117,16 @@ class UserController {
         const { email } = req.body;
         if (email) {
             const check = await userModel.findOne({ email: email })
+            // console.log("harsh")
 
             if (check) {
                 const secretKey = check._id + process.env.JsonTokenKey;
                 const token = jwt.sign({ "userId": "check._id" }, secretKey, { expiresIn: '15m' })
 
-                const link = `http://127.0.0.1.3000/api/user/reset/${check._id}/${secretKey}`;
+                console.log(secretKey);
+                console.log(token);
+
+                const link = `http://127.0.0.1.3000/api/user/reset/${check._id}/${token}`;
                 console.log(link);
                 res.send("password reset mail send sucessfully");
 
@@ -132,6 +136,32 @@ class UserController {
         } else {
             res.send({ "message": "mail is required" });
         }
+    }
+
+    static passwordReset = async (req, res) => {
+        const { password, password_confirmation } = req.body;
+        const { id, token } = req.params;
+        const user = await userModel.findById(id);
+        const tokenKey = user._id + process.env.JsonTokenKey;
+        try {
+            jwt.verify(token, tokenKey);
+            if (password && password_confirmation) {
+                if (password === password_confirmation) {
+                    const salt = await bcrypt.genSalt(10)
+                    const newHashPassword = await bcrypt.hash(password, salt)
+                    await userModel.findByIdAndUpdate(user._id, { $set: { password: newHashPassword } })
+                    res.send({ "status": "success", "message": "Password Reset Successfully" })
+                } else {
+                    res.send("password didn't match");
+                }
+            } else {
+                res.send("all feilds are compuslary");
+            }
+        } catch (error) {
+            console.log(error);
+            res.send("Invalid token")
+        }
+
     }
 
 

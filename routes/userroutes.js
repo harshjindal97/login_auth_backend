@@ -7,13 +7,13 @@ import checkUserAuth from '../middleware/middleware.js';
 
 router.post("/register", UserController.userRegistration);
 router.get("/loggeduser", checkUserAuth);
-router.post("/resetPasswordMail", UserController.passResetMail)
 
 router.post("/login", UserController.userLogin);
+router.post("/resetPasswordMail", UserController.passResetMail)
 router.post("/userChangePassword", checkUserAuth);
 router.post("/userChangePassword", UserController.userChangePassword);
 router.get("/loggedUser", UserController.loggedUser);
-
+router.post("/resetPassword/:id/:token", UserController.passwordReset)
 
 // private router
 
