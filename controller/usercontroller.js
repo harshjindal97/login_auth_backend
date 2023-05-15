@@ -68,7 +68,7 @@ class UserController {
 
                         const Tokenn = jwt.sign({ user_Id: avail._id }, process.env.JsonTokenKey, { expiresIn: '5d' })
 
-
+                        // console.log(user_Id);
                         res.send({ "login": "sucessful", "token": Tokenn })
                     } else {
                         res.send({ "status": "failed", "message": "wrong email or password" })
@@ -99,15 +99,39 @@ class UserController {
             } else {
                 const salt = await bcrypt.genSalt(10);
                 const newHashPass = await bcrypt.hash(password, salt);
-
-
-
+                await userModel.findByIdAndUpdate(req.user._id, { $set: { password: newHashPass } })
                 res.send({ "status": "sucessful", "message": "password change sucessfully" })
             }
         } else {
             res.send({ "status": "failed", "message": "All felids are compulsary" })
         }
 
+    }
+
+    static loggedUser = async (req, res) => {
+        res.send(req.user);
+    }
+
+
+    static passResetMail = async (req, res) => {
+        const { email } = req.body;
+        if (email) {
+            const check = await userModel.findOne({ email: email })
+
+            if (check) {
+                const secretKey = check._id + process.env.JsonTokenKey;
+                const token = jwt.sign({ "userId": "check._id" }, secretKey, { expiresIn: '15m' })
+
+                const link = `http://127.0.0.1.3000/api/user/reset/${check._id}/${secretKey}`;
+                console.log(link);
+                res.send("password reset mail send sucessfully");
+
+            } else {
+                res.send("mail doesnot exist");
+            }
+        } else {
+            res.send({ "message": "mail is required" });
+        }
     }
 
 
