@@ -17,7 +17,7 @@ class UserController {
                     console.log("pass=conf")
                     try {
                         const salt = await bcrypt.genSalt(10);
-                        console.log(salt)
+                        // console.log(salt)
                         const hash_password = await bcrypt.hash(password, salt);
                         const doc = new userModel({
                             name: name,
@@ -84,6 +84,28 @@ class UserController {
         } catch (error) {
             console.log(error);
             res.send({ "status": "failed", "message": "unable to login" })
+        }
+
+    }
+
+
+    static userChangePassword = async (req, res) => {
+
+        const { password, password_confirmation } = req.body;
+
+        if (password && password_confirmation) {
+            if (password !== password_confirmation) {
+                res.send({ "status": "failed", "message": "password not matched" })
+            } else {
+                const salt = await bcrypt.genSalt(10);
+                const newHashPass = await bcrypt.hash(password, salt);
+
+
+
+                res.send({ "status": "sucessful", "message": "password change sucessfully" })
+            }
+        } else {
+            res.send({ "status": "failed", "message": "All felids are compulsary" })
         }
 
     }
